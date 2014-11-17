@@ -1,7 +1,7 @@
 # aziomq
 
 ## Welcome
-The aziomq library provides Boost Asio style bindings for ZeroMq
+The aziomq library provides Boost Asio style bindings for ZeroMQ
 
 This library is built on top of ZeroMQ's standard C interface.
 
