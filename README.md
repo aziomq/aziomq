@@ -1,4 +1,4 @@
-# aziomq4-x
+# aziomq
 
 ## Welcome
 The aziomq library provides Boost Asio style bindings for ZeroMq
@@ -20,7 +20,7 @@ which supports '--std=c++11'.  Currently this has been tested with -
 
 Library dependencies are -
 * Boost 1.53 or later
-* ZeroMQ 4.0
+* ZeroMQ 4.0.x
 
 To build -
 ```
