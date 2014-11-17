@@ -345,25 +345,6 @@ namespace detail {
             return 0;
         }
 
-        template<typename ConstBufferSequence,
-                 typename Handler>
-        void async_send(implementation_type & impl,
-                        ConstBufferSequence const& buffers,
-                        Handler handler,
-                        flags_type flags) {
-            using type = send_buffer_op<ConstBufferSequence, Handler>;
-            enqueue<type>(impl, op_type::write_op, buffers, std::move(handler), flags);
-        }
-
-        template<typename Handler>
-        void async_send(implementation_type & impl,
-                        message msg,
-                        Handler handler,
-                        flags_type flags) {
-            using type = send_op<Handler>;
-            enqueue<type>(impl, op_type::write_op, std::move(msg), std::move(handler), flags);
-        }
-
         template<typename MutableBufferSequence>
         size_t receive(implementation_type & impl,
                        MutableBufferSequence const& buffers,
@@ -414,35 +395,17 @@ namespace detail {
             }
         }
 
-        template<typename MutableBufferSequence,
-                 typename Handler>
-        void async_receive(implementation_type & impl,
-                           MutableBufferSequence const& buffers,
-                           Handler handler,
-                           flags_type flags) {
-            using type = receive_buffer_op<MutableBufferSequence, Handler>;
-            enqueue<type>(impl, op_type::read_op, buffers, std::move(handler), flags);
-        }
-
-        template<typename Handler>
-        void async_receive(implementation_type & impl,
-                           message & msg,
-                           Handler handler,
-                           flags_type flags) {
-            using type = receive_op<Handler>;
-            enqueue<type>(impl, op_type::read_op, std::move(msg), std::move(handler), flags);
-        }
-
-        template<typename MutableBufferSequence,
-                 typename Handler>
-        void async_receive_more(implementation_type & impl,
-                                MutableBufferSequence const& buffers,
-                                Handler handler,
-                                flags_type flags) {
-                unique_lock l{ *impl };
-                using type = receive_more_buffer_op<MutableBufferSequence, Handler>;
-                enqueue<type>(impl, op_type::read_op, buffers, std::move(handler), flags);
+        using reactor_op_ptr = std::unique_ptr<reactor_op>;
+        template<typename T, typename... Args>
+        void enqueue(implementation_type & impl, op_type o, Args&&... args) {
+            reactor_op_ptr p{ new T(std::forward<Args>(args)...) };
+            boost::system::error_code ec = enqueue(impl, o, p);
+            if (ec) {
+                BOOST_ASSERT_MSG(p, "op ptr");
+                p->ec_ = ec;
+                reactor_op::do_complete(p.release());
             }
+        }
 
         private:
             context_type ctx_;
@@ -504,7 +467,6 @@ namespace detail {
                 }
             };
 
-            using reactor_op_ptr = std::unique_ptr<reactor_op>;
             struct deferred_completion {
                 std::weak_ptr<per_descriptor_data> owner_;
                 reactor_op *op_;
@@ -526,18 +488,6 @@ namespace detail {
                 friend
                 bool asio_handler_is_continuation(deferred_completion* handler) { return true; }
             };
-
-
-            template<typename T, typename... Args>
-            void enqueue(implementation_type & impl, op_type o, Args&&... args) {
-                reactor_op_ptr p{ new T(std::forward<Args>(args)...) };
-                boost::system::error_code ec = enqueue(impl, o, p);
-                if (ec) {
-                    BOOST_ASSERT_MSG(p, "op ptr");
-                    p->ec_ = ec;
-                    reactor_op::do_complete(p.release());
-                }
-            }
 
             boost::system::error_code enqueue(implementation_type & impl,
                                             op_type o, reactor_op_ptr & op) {

@@ -13,6 +13,8 @@
 #include "option.hpp"
 #include "io_service.hpp"
 #include "message.hpp"
+#include "detail/send_op.hpp"
+#include "detail/receive_op.hpp"
 
 #include <boost/asio/basic_io_object.hpp>
 #include <boost/asio/io_service.hpp>
@@ -454,7 +456,9 @@ public:
     void async_receive(MutableBufferSequence const& buffers,
                        ReadHandler handler,
                        flags_type flags = 0) {
-        get_service().async_receive(implementation, buffers, std::move(handler), flags);
+        using type = detail::receive_buffer_op<MutableBufferSequence, ReadHandler>;
+        get_service().enqueue<type>(implementation, service_type::op_type::read_op,
+                                    buffers, std::forward<ReadHandler>(handler), flags);
     }
 
     /** \brief Initiate an async receive operation.
@@ -481,8 +485,9 @@ public:
     void async_receive_more(MutableBufferSequence const& buffers,
                             ReadMoreHandler handler,
                             flags_type flags = 0) {
-        get_service().async_receive_more(implementation, buffers,
-                                         std::move(handler), flags);
+        using type = detail::receive_more_buffer_op<MutableBufferSequence, ReadMoreHandler>;
+        get_service().enqueue<type>(implementation, service_type::op_type::read_op,
+                                    buffers, std::forward<ReadMoreHandler>(handler), flags);
     }
 
     /** \brief Initate an async receive operation
@@ -504,8 +509,9 @@ public:
                        bool rebuild_message = false) {
         if (rebuild_message)
             msg.rebuild();
-        get_service().async_receive(implementation, msg,
-                                    std::move(handler), flags);
+        using type = detail::receive_op<ReadHandler>;
+        get_service().enqueue<type>(implementation, service_type::op_type::read_op,
+                                    msg, std::forward<ReadHandler>(handler), flags);
     }
 
     /** \brief Initiate an async send operation
@@ -528,8 +534,9 @@ public:
     void async_send(ConstBufferSequence const& buffers,
                     WriteHandler handler,
                     flags_type flags = 0) {
-        get_service().async_send(implementation, buffers,
-                                 std::move(handler), flags);
+        using type = detail::send_buffer_op<ConstBufferSequence, WriteHandler>;
+        get_service().enqueue<type>(implementation, service_type::op_type::write_op,
+                                    buffers, std::forward<WriteHandler>(handler), flags);
     }
 
     /** \brief Initate an async send operation
@@ -545,8 +552,9 @@ public:
     void async_send(message const& msg,
                     WriteHandler handler,
                     flags_type flags = 0) {
-        get_service().async_send(implementation, msg,
-                                 std::move(handler), flags);
+        using type = detail::send_op<WriteHandler>;
+        get_service().enqueue<type>(implementation, service_type::op_type::write_op,
+                                    msg, std::forward<WriteHandler>(handler), flags);
     }
 
     /** \brief Initiate shutdown of socket
