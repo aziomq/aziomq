@@ -100,26 +100,9 @@ public:
                     int type,
                     bool optimize_single_threaded = false) :
         boost::asio::basic_io_object<io_service::service_type>(ios) {
-        get_service().construct(implementation);
-
         boost::system::error_code ec;
         if (get_service().do_open(implementation, type, optimize_single_threaded, ec))
             throw boost::system::system_error(ec);
-    }
-
-    socket(socket && other) :
-        boost::asio::basic_io_object<io_service::service_type>(other.get_io_service()) {
-        get_service().move_construct(implementation, other.get_service(),
-                                        other.implementation);
-    }
-
-    ~socket() {
-        get_service().destroy(implementation);
-    }
-    socket & operator=(socket && other) {
-        get_service().move_assign(implementation, other.get_service(),
-                                    other.implementation);
-        return *this;
     }
 
     socket(const socket &) = delete;
