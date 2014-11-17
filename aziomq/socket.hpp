@@ -574,7 +574,7 @@ public:
     /** \brief Allows the caller to associate an instance which conforms to the
      *  following protocol:
      *      struct handler {
-     *          void on_install();
+     *          void on_install(io_service& ios, void* socket);
      *          void on_remove();
      *
      *          template<typename Option>

@@ -199,7 +199,7 @@ namespace detail {
             std::tie(it, res) = impl->exts_.emplace(std::type_index(typeid(Extension)),
                                                     socket_ext(std::move(ext)));
             if (res)
-                it->second.on_install(impl->socket_.get());
+                it->second.on_install(get_io_service(), impl->socket_.get());
             return res;
         }
 
