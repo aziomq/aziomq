@@ -80,3 +80,8 @@ Further examples may be found in doc/examples
 Use of this software is granted under the the BOOST 1.0 license
 (same as Boost Asio).  For details see the file `LICENSE-BOOST_1_0
 included with the distribution.
+
+## Contributing
+
+AzioMQ uses the [C4.1 (Collective Code Construction Contract)](http://rfc.zeromq.org/spec:22) process for contributions.
+See the accompanying CONTRIBUTING file for more information.

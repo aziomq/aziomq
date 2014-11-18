@@ -3,7 +3,7 @@
 If you are familiar with ZeroMQ's process, there should be few surprises here.
 
 Development is done on Github. Ideally the process follows the ZeroMQ community's
-[C4] (http://rfc.zeromq.org/spec:22) process guidelines (see licensing notes
+[C4.1] (http://rfc.zeromq.org/spec:22) process guidelines (see licensing notes
 below though). The high points, in particular are:
 
 * Log an issue (Github only) that explains the problem you are solving.
