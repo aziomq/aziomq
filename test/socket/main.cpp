@@ -7,6 +7,7 @@
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 */
 #include <aziomq/socket.hpp>
+#include <aziomq/util/scope_guard.hpp>
 
 #define BOOST_ENABLE_ASSERT_HANDLER
 #include <boost/assert.hpp>
@@ -176,6 +177,62 @@ void test_send_receive_async_threads(bool optimize_single_threaded) {
     BOOST_ASSERT_MSG(btb == 9, "btb != 9");
 }
 
+void test_send_receive_message_async() {
+    boost::asio::io_service ios_b;
+    boost::asio::io_service ios_c;
+
+    aziomq::socket sb(ios_b, ZMQ_ROUTER);
+    sb.bind(subj(__PRETTY_FUNCTION__));
+
+    aziomq::socket sc(ios_c, ZMQ_DEALER);
+    sc.connect(subj(__PRETTY_FUNCTION__));
+
+    boost::system::error_code ecc;
+    size_t btc = 0;
+    sc.async_send(snd_bufs, [&] (boost::system::error_code const& ec, size_t bytes_transferred) {
+        ecc = ec;
+        btc = bytes_transferred;
+        ios_c.stop();
+    }, ZMQ_SNDMORE);
+
+    std::array<char, 5> ident;
+    std::array<char, 2> a;
+    std::array<char, 2> b;
+
+    boost::system::error_code ecb;
+    size_t btb = 0;
+    sb.async_receive([&](boost::system::error_code const& ec, aziomq::message & msg, size_t bytes_transferred) {
+        SCOPE_EXIT { ios_b.stop(); };
+        ecb = ec;
+        if (ecb)
+            return;
+        btb += bytes_transferred;
+        msg.buffer_copy(boost::asio::buffer(ident));
+
+        if (msg.more()) {
+            btb += sb.receive(msg, ZMQ_RCVMORE, ecb, true);
+            if (ecb)
+                return;
+            msg.buffer_copy(boost::asio::buffer(a));
+        }
+
+        if (msg.more()) {
+            btb += sb.receive(msg, 0, ecb, true);
+            if (ecb)
+                return;
+            msg.buffer_copy(boost::asio::buffer(b));
+        }
+    });
+
+    ios_c.run();
+    ios_b.run();
+
+    BOOST_ASSERT_MSG(!ecc, "!ecc");
+    BOOST_ASSERT_MSG(btc == 4, "btc != 4");
+    BOOST_ASSERT_MSG(!ecb, "!ecb");
+    BOOST_ASSERT_MSG(btb == 9, "btb != 9");
+}
+
 int main(int argc, char **argv) {
     std::cout << "Testing socket operations...";
     try {
@@ -187,6 +244,7 @@ int main(int argc, char **argv) {
             test_send_receive_async_threads(true);
         for (auto i = 0; i < 100; i++)
             test_send_receive_async_threads(false);
+        test_send_receive_message_async();
     } catch (std::exception const& e) {
         std::cout << "Failure\n" << e.what() << std::endl;
         return 1;

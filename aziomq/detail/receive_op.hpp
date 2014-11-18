@@ -136,15 +136,11 @@ private:
 
 class receive_op_base : public reactor_op {
 public:
-    receive_op_base(message & msg,
-                    socket_ops::flags_type flags,
+    receive_op_base(socket_ops::flags_type flags,
                     complete_func_type complete_func)
         : reactor_op(&receive_op_base::do_perform, complete_func)
-        , msg_(msg)
         , flags_(flags)
-        {
-            msg_.rebuild();
-        }
+        { }
 
     static bool do_perform(reactor_op* base, socket_type & socket) {
         auto o = static_cast<receive_op_base*>(base);
@@ -156,20 +152,17 @@ public:
         return true;
     }
 
-private:
-    message & msg_;
+protected:
+    message msg_;
     flags_type flags_;
 };
 
 template<typename Handler>
 class receive_op : public receive_op_base {
 public:
-    receive_op(void* socket,
-               message & msg,
-               Handler handler,
-               socket_ops::flags_type flags,
-               complete_func_type complete_func)
-        : receive_op_base(msg, flags, &receive_op::do_complete)
+    receive_op(Handler handler,
+               socket_ops::flags_type flags)
+        : receive_op_base(flags, &receive_op::do_complete)
         , handler_(std::move(handler))
         { }
 
@@ -178,10 +171,11 @@ public:
                             size_t) {
         auto o = static_cast<receive_op*>(base);
         auto h = std::move(o->handler_);
+        auto m = std::move(o->msg_);
         auto ec = o->ec_;
         auto bt = o->bytes_transferred_;
         delete o;
-        h(ec, bt);
+        h(ec, m, bt);
     }
 
 private:

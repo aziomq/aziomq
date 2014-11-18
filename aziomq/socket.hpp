@@ -477,7 +477,7 @@ public:
      *  does not error if more parts remain than buffers supplied.  The
      *  completion handler will be called with a more_result indicating the
      *  number of bytes transferred thus far, and flag indicating whether
-     *  more message parts remain. The handler may then make syncrhonous
+     *  more message parts remain. The handler may then make synchronous
      *  receive_more() calls to collect the remaining message parts.
      */
     template<typename MutableBufferSequence,
@@ -491,27 +491,29 @@ public:
     }
 
     /** \brief Initate an async receive operation
-     *  \tparam ReadHandler must conform to the asio ReadHandler concept
-     *  \param msg raw_message reference
+     *  \tparam MessageReadHandler must conform to the MessageReadHandler concept
      *  \param handler ReadHandler
      *  \param flags int flags
-     *  \param rebuild_message bool
-     *  \remarks
-     *      This variant provides access to a type that thinly wraps the underlying
-     *      libzmq message type.  The rebuild_message flag indicates whether the
-     *      message provided should be closed and rebuilt.  This is useful when
-     *      reusing the same message instance across multiple receive operations.
+     *  \remark
+     *  The MessageReadHandler concept has the following interface
+     *  struct MessageReadHandler {
+     *      void operator()(const boost::system::error_code & ec,
+     *                      message & msg,
+     *                      size_t bytes_transferred);
+     *  }
+     *  \remark
+     *  Multipart messages can be handled by checking the status of more() on the
+     *  supplied message, and calling synchronous receive() to retrieve subsequent
+     *  message parts. If a handler wishes to retain the supplied message after the
+     *  MessageReadHandler returns, it must make an explicit copy or move of
+     *  the message.
      */
-    template<typename ReadHandler>
-    void async_receive(message & msg,
-                       ReadHandler handler,
-                       flags_type flags = 0,
-                       bool rebuild_message = false) {
-        if (rebuild_message)
-            msg.rebuild();
-        using type = detail::receive_op<ReadHandler>;
+    template<typename MessageReadHandler>
+    void async_receive(MessageReadHandler handler,
+                       flags_type flags = 0) {
+        using type = detail::receive_op<MessageReadHandler>;
         get_service().enqueue<type>(implementation, service_type::op_type::read_op,
-                                    msg, std::forward<ReadHandler>(handler), flags);
+                                    std::forward<MessageReadHandler>(handler), flags);
     }
 
     /** \brief Initiate an async send operation

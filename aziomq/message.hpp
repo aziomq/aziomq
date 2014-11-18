@@ -25,7 +25,6 @@
 #include <ostream>
 #include <cstring>
 
-#include <iostream>
 namespace aziomq {
 namespace detail {
     struct socket_ops;
@@ -104,6 +103,10 @@ inline namespace V1 {
 
             auto pv = zmq_msg_data(const_cast<zmq_msg_t*>(&msg_));
             return boost::asio::buffer(pv, size());
+        }
+
+        size_t buffer_copy(boost::asio::mutable_buffer const& target) const {
+            return boost::asio::buffer_copy(target, boost::asio::buffer(*this));
         }
 
         bool operator==(const message & rhs) const {

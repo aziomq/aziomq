@@ -6,6 +6,7 @@
 #include <boost/asio/buffer.hpp>
 
 #include <array>
+#include <iostream>
 
 #include "../assert.ipp"
 
