@@ -270,7 +270,6 @@ public:
     /** \brief Receive some data from the socket
      *  \param msg raw_message to fill on receive
      *  \param flags specifying how the receive call is to be made
-     *  \param rebuild_message bool
      *  \returns byte's received
      *  \remarks
      *      This variant provides access to a type that thinly wraps the underlying
@@ -280,10 +279,7 @@ public:
      */
     std::size_t receive(message & msg,
                         flags_type flags,
-                        boost::system::error_code & ec,
-                        bool rebuild_message = false) {
-        if (rebuild_message)
-            msg.rebuild();
+                        boost::system::error_code & ec) {
         return get_service().receive(implementation, msg, flags, ec);
     }
 
@@ -299,10 +295,9 @@ public:
      *      reusing the same message instance across multiple receive operations.
      */
     std::size_t receive(message & msg,
-                        flags_type flags = 0,
-                        bool rebuild_message = false) {
+                        flags_type flags = 0) {
         boost::system::error_code ec;
-        auto res = receive(msg, flags, ec, rebuild_message);
+        auto res = receive(msg, flags, ec);
         if (ec)
             throw boost::system::system_error(ec);
         return res;

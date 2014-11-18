@@ -57,11 +57,11 @@ void test_send_receive_sync() {
 
     BOOST_ASSERT_MSG(msg.more(), "more");
 
-    size = sb.receive(msg, 0, true);
+    size = sb.receive(msg, 0);
     BOOST_ASSERT_MSG(size == boost::asio::buffer_size(snd_bufs[0]), "buffer size");
     BOOST_ASSERT_MSG(msg.more(), "more");
 
-    size = sb.receive(msg, 0, true);
+    size = sb.receive(msg, 0);
     BOOST_ASSERT_MSG(size == boost::asio::buffer_size(snd_bufs[1]), "buffer size");
     BOOST_ASSERT_MSG(!msg.more(), "!more");
 
@@ -210,14 +210,14 @@ void test_send_receive_message_async() {
         msg.buffer_copy(boost::asio::buffer(ident));
 
         if (msg.more()) {
-            btb += sb.receive(msg, ZMQ_RCVMORE, ecb, true);
+            btb += sb.receive(msg, ZMQ_RCVMORE, ecb);
             if (ecb)
                 return;
             msg.buffer_copy(boost::asio::buffer(a));
         }
 
         if (msg.more()) {
-            btb += sb.receive(msg, 0, ecb, true);
+            btb += sb.receive(msg, 0, ecb);
             if (ecb)
                 return;
             msg.buffer_copy(boost::asio::buffer(b));
