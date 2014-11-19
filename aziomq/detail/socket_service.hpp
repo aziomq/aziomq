@@ -366,13 +366,13 @@ namespace detail {
             return 0;
         }
 
-        size_t receive(implementation_type & impl,
+        size_t receive_more(implementation_type & impl,
                        message_vector & vec,
                        flags_type flags,
                        boost::system::error_code & ec) {
             unique_lock l{ *impl };
             if (!is_shutdown(impl, op_type::read_op, ec))
-                return socket_ops::receive(vec, impl->socket_, flags, ec);
+                return socket_ops::receive_more(vec, impl->socket_, flags, ec);
             return 0;
         }
 

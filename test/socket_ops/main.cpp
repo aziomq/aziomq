@@ -102,7 +102,7 @@ void test_send_receive_inproc_msg_vect() {
     BOOST_ASSERT(!ec);
 
     aziomq::message_vector rcv_msgs;
-    aziomq::detail::socket_ops::receive(rcv_msgs, sb, 0, ec);
+    aziomq::detail::socket_ops::receive_more(rcv_msgs, sb, 0, ec);
     BOOST_ASSERT(!ec);
     BOOST_ASSERT(rcv_msgs.size() == 3);
 }

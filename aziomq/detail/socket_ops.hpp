@@ -210,15 +210,15 @@ namespace detail {
             return res;
         }
 
-        static size_t receive(message_vector & vec,
-                              socket_type & socket,
-                              flags_type flags,
-                              boost::system::error_code & ec) {
+        static size_t receive_more(message_vector & vec,
+                                   socket_type & socket,
+                                   flags_type flags,
+                                   boost::system::error_code & ec) {
             size_t res = 0;
             message msg;
             auto more = false;
             do {
-                res += receive(msg, socket, flags, ec);
+                res += receive(msg, socket, flags | ZMQ_RCVMORE, ec);
                 if (ec) return 0;
                 more = msg.more();
                 vec.emplace_back(std::move(msg));

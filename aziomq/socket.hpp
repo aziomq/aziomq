@@ -329,7 +329,7 @@ public:
      *  \return pair<size_t, bool>
      *  \throw boost::system::system_error
      *  \remark
-     *  Works as for receive() with flags containing ZMQ_RCV_MORE but returns
+     *  Works as for receive() with flags containing ZMQ_RCVMORE but returns
      *  a pair containing the number of bytes transferred and a boolean flag
      *  which if true, indicates more message parts are available on the
      *  socket.
@@ -339,6 +339,37 @@ public:
                                   flags_type flags = 0) {
         boost::system::error_code ec;
         auto res = receive_more(buffers, flags, ec);
+        if (ec)
+            throw boost::system::system_error(ec);
+        return res;
+    }
+
+    /** \brief Receive remaining parts of a multipart message from the socket
+     *  \param vec messave_vector to fill on receive
+     *  \flags specifying how the receive call is to be made
+     *  \param ec set to indicate what error, if any, occurred
+     *  \return size_t bytes transferred
+     *  \remark
+     *  Works as for receive() with flags containing ZMQ_RCVMORE
+     */
+    size_t receive_more(message_vector & vec,
+                        flags_type flags,
+                        boost::system::error_code & ec) {
+        return get_service().receive_more(implementation, vec, flags, ec);
+    }
+
+    /** \brief Receive remaining parts of a multipart message from the socket
+     *  \param vec messave_vector to fill on receive
+     *  \flags specifying how the receive call is to be made
+     *  \return size_t bytes transferred
+     *  \throw boost::system::system_error
+     *  \remark
+     *  Works as for receive() with flags containing ZMQ_RCVMORE
+     */
+    size_t receive_more(message_vector & vec,
+                        flags_type flags) {
+        boost::system::error_code ec;
+        auto res = receive_more(vec, flags, ec);
         if (ec)
             throw boost::system::system_error(ec);
         return res;
