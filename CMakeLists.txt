@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 2.8)
 project(aziomq)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DAZIOMQ_ENABLE_HANDLER_TRACKING")
 
 if(USE_LIBCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
@@ -23,8 +22,7 @@ include_directories(${Boost_INCLUDE_DIRS}
 enable_testing()
 add_subdirectory(src)
 add_subdirectory(test)
-#add_subdirectory(test)
 #add_subdirectory(doc/examples)
 
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/aziomq
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/aziomq
         DESTINATION include)
