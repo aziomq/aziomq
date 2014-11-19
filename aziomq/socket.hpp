@@ -599,6 +599,13 @@ public:
             throw boost::system::system_error(ec);
     }
 
+    /** \brief Allows access to the underlying ZeroMQ socket
+     *  \remark With great power, comes great responsibility
+     */
+    native_handle_type native_handle() {
+        return get_service().native_handle(implementation);
+    }
+
     /** \brief Allows the caller to associate an instance which conforms to the
      *  following protocol:
      *      struct handler {

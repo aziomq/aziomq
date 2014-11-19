@@ -40,6 +40,7 @@ namespace detail {
             }
         };
 
+        using raw_socket_type = void*;
         using socket_type = std::unique_ptr<void, socket_close>;
         using native_handle_type = boost::asio::posix::stream_descriptor::native_handle_type;
         using stream_descriptor = std::unique_ptr<boost::asio::posix::stream_descriptor>;

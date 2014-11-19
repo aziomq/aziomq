@@ -38,8 +38,8 @@ namespace aziomq {
 namespace detail {
     struct socket_service : boost::asio::io_service::service {
         using socket_type = socket_ops::socket_type;
+        using native_handle_type= socket_ops::raw_socket_type;
         using stream_descriptor = socket_ops::stream_descriptor;
-        using native_handle_type = socket_ops::native_handle_type;
         using endpoint_type = socket_ops::endpoint_type;
         using flags_type = socket_ops::flags_type;
         using more_result_type = socket_ops::more_result_type;
@@ -188,6 +188,12 @@ namespace detail {
 
         void destroy(implementation_type & impl) {
             impl.reset();
+        }
+
+        native_handle_type native_handle(implementation_type & impl) {
+            BOOST_ASSERT_MSG(impl, "impl");
+            unique_lock l{ *impl };
+            return impl->socket_.get();
         }
 
         template<typename Extension>
