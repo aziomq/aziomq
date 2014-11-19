@@ -14,7 +14,7 @@ may be freely mixed with other Asio socket types (raw TCP/UDP/Serial/etc.).
 ## Building and installation
 
 Building requires a recent version of CMake (2.8 or later), and a C++ compiler
-which supports '--std=c++11'.  Currently this has been tested with -
+which supports '-std=c++11'.  Currently this has been tested with -
 * OSX10.9 Mavericks XCode6
 * Arch Linux, Ubuntu w/GCC4.8
 
