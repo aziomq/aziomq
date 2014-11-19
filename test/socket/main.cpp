@@ -96,9 +96,9 @@ void test_send_receive_async(bool is_speculative) {
     boost::system::error_code ecc;
     size_t btc = 0;
     sc.async_send(snd_bufs, [&] (boost::system::error_code const& ec, size_t bytes_transferred) {
+        SCOPE_EXIT { ios_c.stop(); };
         ecc = ec;
         btc = bytes_transferred;
-        ios_c.stop();
     }, ZMQ_SNDMORE);
 
     std::array<char, 5> ident;
@@ -114,9 +114,9 @@ void test_send_receive_async(bool is_speculative) {
     boost::system::error_code ecb;
     size_t btb = 0;
     sb.async_receive(rcv_bufs, [&](boost::system::error_code const& ec, size_t bytes_transferred) {
+        SCOPE_EXIT { ios_b.stop(); };
         ecb = ec;
         btb = bytes_transferred;
-        ios_b.stop();
     }, ZMQ_RCVMORE);
 
     ios_c.run();
@@ -141,9 +141,9 @@ void test_send_receive_async_threads(bool optimize_single_threaded) {
     size_t btc = 0;
     std::thread tc([&] {
         sc.async_send(snd_bufs, [&] (boost::system::error_code const& ec, size_t bytes_transferred) {
+            SCOPE_EXIT { ios_c.stop(); };
             ecc = ec;
             btc = bytes_transferred;
-            ios_c.stop();
         }, ZMQ_SNDMORE);
         ios_c.run();
     });
@@ -162,9 +162,9 @@ void test_send_receive_async_threads(bool optimize_single_threaded) {
         }};
 
         sb.async_receive(rcv_bufs, [&](boost::system::error_code const& ec, size_t bytes_transferred) {
+            SCOPE_EXIT { ios_b.stop(); };
             ecb = ec;
             btb = bytes_transferred;
-            ios_b.stop();
         }, ZMQ_RCVMORE);
         ios_b.run();
     });
@@ -190,9 +190,9 @@ void test_send_receive_message_async() {
     boost::system::error_code ecc;
     size_t btc = 0;
     sc.async_send(snd_bufs, [&] (boost::system::error_code const& ec, size_t bytes_transferred) {
+        SCOPE_EXIT { ios_c.stop(); };
         ecc = ec;
         btc = bytes_transferred;
-        ios_c.stop();
     }, ZMQ_SNDMORE);
 
     std::array<char, 5> ident;
@@ -246,9 +246,9 @@ void test_send_receive_message_more_async() {
     boost::system::error_code ecc;
     size_t btc = 0;
     sc.async_send(snd_bufs, [&] (boost::system::error_code const& ec, size_t bytes_transferred) {
+        SCOPE_EXIT { ios_c.stop(); };
         ecc = ec;
         btc = bytes_transferred;
-        ios_c.stop();
     }, ZMQ_SNDMORE);
 
     std::array<char, 5> ident;
